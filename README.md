@@ -24,13 +24,13 @@ This system analyzes travel images to:
 ### Option 1: Google Colab (Recommended)
 
 **Step 1: Image Analysis**
-[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/ashwin-yedte/visual-intelligence-travel-finance/blob/main/notebooks/Step_1_Image_Analysis_v1.ipynb)
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/ashwin-yedte/visual-intelligence-travel-finance/blob/main/notebooks/Step_1_Image_Analysis.ipynb)
 
 **Step 2: Theme Extraction**
-[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/ashwin-yedte/visual-intelligence-travel-finance/blob/main/notebooks/Step_2_Theme_Extraction_v1.ipynb)
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/ashwin-yedte/visual-intelligence-travel-finance/blob/main/notebooks/Step_2_Theme_Extraction.ipynb)
 
 **Step 3: Geo-Location Identification**
-[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/ashwin-yedte/visual-intelligence-travel-finance/blob/main/notebooks/Step_3_Geo_Location_Identification_v1.ipynb)
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/ashwin-yedte/visual-intelligence-travel-finance/blob/main/notebooks/Step_3_Geo_Location_Identification.ipynb)
 
 ### Option 2: Local Installation
 ```bash
