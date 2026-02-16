@@ -1,0 +1,749 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Recommended Destinations - Complete Gallery</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        
+        .container { max-width: 1400px; margin: 0 auto; padding: 20px; }
+        
+        .upload-section {
+            background: white;
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            margin-bottom: 30px;
+        }
+        
+        h1 { color: #333; margin-bottom: 10px; font-size: 32px; }
+        .subtitle { color: #666; margin-bottom: 30px; font-size: 16px; }
+        
+        #drop-zone {
+            border: 3px dashed #ddd;
+            border-radius: 10px;
+            padding: 60px 20px;
+            text-align: center;
+            background: #fafafa;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        #drop-zone:hover { border-color: #667eea; background: #f0f4ff; }
+        
+        .preview-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .preview-item {
+            position: relative;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        
+        .preview-item img { width: 100%; height: 120px; object-fit: cover; }
+        
+        .remove-btn {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            background: rgba(255,0,0,0.9);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 28px;
+            height: 28px;
+            cursor: pointer;
+            font-size: 18px;
+        }
+        
+        .analyze-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 18px 40px;
+            font-size: 18px;
+            font-weight: bold;
+            border-radius: 8px;
+            cursor: pointer;
+            margin-top: 20px;
+            width: 100%;
+        }
+        
+        .analyze-btn:disabled { background: #ccc; cursor: not-allowed; }
+        
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 40px;
+            background: white;
+            border-radius: 15px;
+        }
+        
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 60px;
+            height: 60px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .results-section { display: none; }
+        
+        .results-header {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        
+        .results-header h2 { color: #333; font-size: 28px; margin-bottom: 10px; }
+        
+        .theme-badge {
+            display: inline-block;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 14px;
+            margin-top: 10px;
+        }
+        
+        .gallery-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+            gap: 25px;
+        }
+        
+        .destination-card {
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            transition: transform 0.3s;
+        }
+        
+        .destination-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+        }
+        
+        .card-image-placeholder {
+            width: 100%;
+            height: 200px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 48px;
+        }
+        
+        .card-content { padding: 20px; }
+        
+        .card-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+        
+        .card-rank {
+            background: #667eea;
+            color: white;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 16px;
+        }
+        
+        .card-title {
+            font-size: 22px;
+            color: #333;
+            font-weight: 600;
+            flex: 1;
+        }
+        
+        .card-location {
+            color: #999;
+            font-size: 14px;
+            margin-bottom: 15px;
+        }
+        
+        .score-container {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        
+        .score-item {
+            flex: 1;
+            text-align: center;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+        
+        .score-label { font-size: 11px; color: #999; text-transform: uppercase; }
+        .score-value { font-size: 18px; font-weight: bold; color: #667eea; }
+        
+        .geo-section {
+            margin: 15px 0;
+            padding: 12px;
+            background: #f0f8ff;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+        }
+        
+        .geo-title {
+            font-size: 13px;
+            color: #667eea;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+        
+        .geo-info {
+            font-size: 12px;
+            color: #666;
+            line-height: 1.6;
+        }
+        
+        .offers-section {
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid #eee;
+        }
+        
+        .offers-title {
+            font-size: 13px;
+            color: #999;
+            text-transform: uppercase;
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+        
+        .offer-item {
+            background: #f8f9fa;
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 8px;
+        }
+        
+        .offer-name {
+            font-size: 14px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 4px;
+        }
+        
+        .offer-details {
+            font-size: 12px;
+            color: #666;
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+        
+        .offer-price { color: #667eea; font-weight: bold; }
+        .offer-rating { color: #ffa500; }
+        
+        .characteristics {
+            margin-top: 15px;
+        }
+        
+        .char-title {
+            font-size: 13px;
+            color: #999;
+            text-transform: uppercase;
+            margin-bottom: 10px;
+        }
+        
+        .char-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        
+        .char-tag {
+            background: #f0f4ff;
+            color: #667eea;
+            padding: 5px 12px;
+            border-radius: 15px;
+            font-size: 12px;
+        }
+        
+        .view-btn {
+            width: 100%;
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            margin-top: 15px;
+        }
+        
+        .view-btn:hover { background: #5568d3; }
+        
+        .back-btn {
+            background: white;
+            color: #667eea;
+            border: 2px solid #667eea;
+            padding: 12px 30px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            margin-top: 20px;
+        }
+        
+        .back-btn:hover {
+            background: #667eea;
+            color: white;
+        }
+        
+        .error-box {
+            background: #fff3cd;
+            border: 1px solid #ffc107;
+            color: #856404;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div id="upload-section" class="upload-section">
+            <h1>🏖️ Find Your Perfect Destination</h1>
+            <p class="subtitle">Upload 1-5 images and discover similar destinations</p>
+            
+            <div id="drop-zone">
+                <p style="font-size: 48px; margin-bottom: 10px;">📸</p>
+                <p style="font-size: 18px; font-weight: 500;">Drag & drop your images here</p>
+                <p style="color: #999; font-size: 14px; margin-top: 5px;">or click to browse</p>
+            </div>
+            
+            <input type="file" id="file-input" multiple accept="image/jpeg,image/jpg,image/png" style="display: none;">
+            <div id="preview-container" class="preview-grid"></div>
+            <button id="analyze-btn" class="analyze-btn" disabled>Find My Perfect Destination</button>
+            <div id="error-container"></div>
+        </div>
+        
+        <div id="loading" class="loading">
+            <div class="spinner"></div>
+            <p style="color: #667eea; font-size: 18px; margin-bottom: 10px;">Finding your perfect destinations...</p>
+            <p id="progress-step" style="color: #999; font-size: 14px;">Analyzing images...</p>
+        </div>
+        
+        <div id="results-section" class="results-section">
+            <div class="results-header">
+                <h2 id="results-title">Recommended Destinations</h2>
+                <div class="theme-badge" id="theme-badge"></div>
+                <p id="confidence-text" style="color: #666; margin-top: 10px;"></p>
+            </div>
+            
+            <div id="gallery-grid" class="gallery-grid"></div>
+            
+            <button class="back-btn" onclick="resetSearch()">🔍 Search Again</button>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = "https://dextrously-nonaddicting-alaya.ngrok-free.dev";
+        const MAX_IMAGES = 5;
+        let selectedFiles = [];
+        let allRecommendations = [];
+        
+        const dropZone = document.getElementById('drop-zone');
+        const fileInput = document.getElementById('file-input');
+        const previewContainer = document.getElementById('preview-container');
+        const analyzeBtn = document.getElementById('analyze-btn');
+        const errorContainer = document.getElementById('error-container');
+        const uploadSection = document.getElementById('upload-section');
+        const loadingDiv = document.getElementById('loading');
+        const resultsSection = document.getElementById('results-section');
+        const progressStep = document.getElementById('progress-step');
+        
+        dropZone.addEventListener('click', () => fileInput.click());
+        fileInput.addEventListener('change', handleFiles);
+        
+        dropZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dropZone.style.borderColor = '#667eea';
+        });
+        
+        dropZone.addEventListener('dragleave', () => {
+            dropZone.style.borderColor = '#ddd';
+        });
+        
+        dropZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropZone.style.borderColor = '#ddd';
+            handleFiles({ target: { files: e.dataTransfer.files } });
+        });
+        
+        analyzeBtn.addEventListener('click', findDestinations);
+        
+        function handleFiles(e) {
+            const files = Array.from(e.target.files);
+            
+            if (selectedFiles.length + files.length > MAX_IMAGES) {
+                showError('Maximum ' + MAX_IMAGES + ' images allowed');
+                return;
+            }
+            
+            files.forEach(file => {
+                if (!file.type.match('image/(jpeg|jpg|png)')) {
+                    showError(file.name + ': Only JPG and PNG supported');
+                    return;
+                }
+                
+                if (file.size / (1024 * 1024) > 10) {
+                    showError(file.name + ': Max 10MB');
+                    return;
+                }
+                
+                selectedFiles.push(file);
+                createPreview(file);
+            });
+            
+            updateUI();
+        }
+        
+        function createPreview(file) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const div = document.createElement('div');
+                div.className = 'preview-item';
+                div.dataset.filename = file.name;
+                div.innerHTML = '<img src="' + e.target.result + '"><button class="remove-btn" onclick="removeImage(\'' + file.name + '\')">×</button>';
+                previewContainer.appendChild(div);
+            };
+            reader.readAsDataURL(file);
+        }
+        
+        function removeImage(filename) {
+            selectedFiles = selectedFiles.filter(f => f.name !== filename);
+            const preview = previewContainer.querySelector('[data-filename="' + filename + '"]');
+            if (preview) preview.remove();
+            updateUI();
+        }
+        
+        function updateUI() {
+            analyzeBtn.disabled = selectedFiles.length === 0;
+            analyzeBtn.textContent = selectedFiles.length > 0 
+                ? 'Find My Perfect Destination (' + selectedFiles.length + ' image' + (selectedFiles.length > 1 ? 's' : '') + ')' 
+                : 'Find My Perfect Destination';
+        }
+        
+        async function findDestinations() {
+            uploadSection.style.display = 'none';
+            loadingDiv.style.display = 'block';
+            errorContainer.innerHTML = '';
+            
+            progressStep.textContent = 'Step 1/4: Analyzing images...';
+            
+            try {
+                const formData = new FormData();
+                selectedFiles.forEach(file => formData.append('files', file));
+                
+                setTimeout(() => progressStep.textContent = 'Step 2/4: Matching destinations...', 2000);
+                setTimeout(() => progressStep.textContent = 'Step 3/4: Analyzing themes...', 4000);
+                setTimeout(() => progressStep.textContent = 'Step 4/4: Preparing recommendations...', 6000);
+                
+                const response = await fetch(API_URL + '/api/recommend-destinations', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const data = await response.json();
+                
+                loadingDiv.style.display = 'none';
+                
+                if (data.status === 'error') {
+                    uploadSection.style.display = 'block';
+                    showError(data.error);
+                    return;
+                }
+                
+                console.log('API Response:', data);
+                displayResults(data);
+                
+            } catch (error) {
+                loadingDiv.style.display = 'none';
+                uploadSection.style.display = 'block';
+                showError('Network error: ' + error.message);
+            }
+        }
+        
+        function displayResults(data) {
+            const profile = data.user_profile;
+            const recommendations = data.recommendations;
+            
+            allRecommendations = recommendations;
+            
+            document.getElementById('theme-badge').textContent = profile.dominant_theme + ' Destinations';
+            document.getElementById('confidence-text').textContent = 
+                profile.theme_confidence + '% confidence based on your images';
+            
+            const galleryGrid = document.getElementById('gallery-grid');
+            galleryGrid.innerHTML = '';
+            
+            recommendations.forEach(dest => {
+                const card = createDestinationCard(dest);
+                galleryGrid.appendChild(card);
+            });
+            
+            resultsSection.style.display = 'block';
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+        
+        function createDestinationCard(dest) {
+            const card = document.createElement('div');
+            card.className = 'destination-card';
+            
+            const themeEmoji = dest.theme === 'Beach' ? '🏖️' : dest.theme === 'Waterfall' ? '💧' : '🏞️';
+            const characteristics = Object.values(dest.characteristics || {}).flat().slice(0, 3);
+            
+            let geoHTML = '';
+            if (dest.geo_location && (dest.geo_location.latitude || dest.geo_location.city)) {
+                geoHTML = '<div class="geo-section"><div class="geo-title">📍 Location</div><div class="geo-info">';
+                if (dest.geo_location.city) {
+                    geoHTML += dest.geo_location.city;
+                    if (dest.geo_location.region) geoHTML += ', ' + dest.geo_location.region;
+                    geoHTML += '<br>';
+                }
+                if (dest.geo_location.latitude && dest.geo_location.longitude) {
+                    geoHTML += 'Coordinates: ' + dest.geo_location.latitude.toFixed(4) + ', ' + dest.geo_location.longitude.toFixed(4);
+                }
+                geoHTML += '</div></div>';
+            }
+            
+            let offersHTML = '';
+            if (dest.offers && (dest.offers.hotels || dest.offers.activities)) {
+                offersHTML = '<div class="offers-section"><div class="offers-title">💼 Available Offers</div>';
+                
+                if (dest.offers.hotels && dest.offers.hotels.length > 0) {
+                    dest.offers.hotels.slice(0, 2).forEach(hotel => {
+                        offersHTML += '<div class="offer-item">';
+                        offersHTML += '<div class="offer-name">🏨 ' + hotel.name + '</div>';
+                        offersHTML += '<div class="offer-details">';
+                        if (hotel.price_per_night) offersHTML += '<span class="offer-price">₹' + hotel.price_per_night + '/night</span>';
+                        if (hotel.rating) offersHTML += '<span class="offer-rating">⭐ ' + hotel.rating + '</span>';
+                        offersHTML += '</div></div>';
+                    });
+                }
+                
+                if (dest.offers.activities && dest.offers.activities.length > 0) {
+                    dest.offers.activities.slice(0, 2).forEach(activity => {
+                        offersHTML += '<div class="offer-item">';
+                        offersHTML += '<div class="offer-name">🎯 ' + activity.name + '</div>';
+                        offersHTML += '<div class="offer-details">';
+                        if (activity.price) offersHTML += '<span class="offer-price">₹' + activity.price + '</span>';
+                        if (activity.duration_hours) offersHTML += '<span>' + activity.duration_hours + 'h</span>';
+                        offersHTML += '</div></div>';
+                    });
+                }
+                
+                offersHTML += '</div>';
+            }
+            
+            card.innerHTML = 
+                '<div class="card-image-placeholder">' + themeEmoji + '</div>' +
+                '<div class="card-content">' +
+                    '<div class="card-header">' +
+                        '<div class="card-rank">' + dest.rank + '</div>' +
+                        '<div class="card-title">' + dest.destination_name + '</div>' +
+                    '</div>' +
+                    '<div class="card-location">📍 ' + dest.state + ', India</div>' +
+                    '<div class="score-container">' +
+                        '<div class="score-item">' +
+                            '<div class="score-label">Match</div>' +
+                            '<div class="score-value">' + Math.round(dest.similarity_score) + '%</div>' +
+                        '</div>' +
+                        '<div class="score-item">' +
+                            '<div class="score-label">Appears</div>' +
+                            '<div class="score-value">' + dest.appearances + 'x</div>' +
+                        '</div>' +
+                        '<div class="score-item">' +
+                            '<div class="score-label">Score</div>' +
+                            '<div class="score-value">' + dest.final_score.toFixed(1) + '</div>' +
+                        '</div>' +
+                    '</div>' +
+                    geoHTML +
+                    offersHTML +
+                    (characteristics.length > 0 ? 
+                        '<div class="characteristics">' +
+                            '<div class="char-title">✨ Characteristics</div>' +
+                            '<div class="char-tags">' +
+                                characteristics.map(c => '<span class="char-tag">' + c.split(',')[0] + '</span>').join('') +
+                            '</div>' +
+                        '</div>' : '') +
+                    '<button class="view-btn" onclick="viewDetails(' + dest.rank + ')">View Full Details</button>' +
+                '</div>';
+            
+            return card;
+        }
+        
+        function viewDetails(rank) {
+            const dest = allRecommendations.find(d => d.rank === rank);
+            
+            if (!dest) {
+                alert('Destination not found');
+                return;
+            }
+            
+            const modal = document.createElement('div');
+            modal.id = 'details-modal';
+            modal.style.cssText = 'position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 1000; overflow-y: auto; padding: 20px;';
+            
+            const hasImages = dest.images && dest.images.length > 0;
+            
+            let imagesHTML = '';
+            if (hasImages) {
+                imagesHTML = '<div style="margin-bottom: 20px;"><h3 style="margin-bottom: 15px;">📸 Photo Gallery</h3><div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 15px;">';
+                
+                dest.images.forEach((imgBase64, idx) => {
+                    imagesHTML += '<img src="' + imgBase64 + '" style="width: 100%; height: 200px; object-fit: cover; border-radius: 8px; cursor: pointer;" onclick="openImageFullscreen(this.src)" title="Click to enlarge">';
+                });
+                
+                imagesHTML += '</div></div>';
+            } else {
+                imagesHTML = '<div style="background: #f0f4ff; padding: 20px; border-radius: 8px; text-align: center; color: #667eea; margin-bottom: 20px;">📷 Images coming soon</div>';
+            }
+            
+            let charHTML = '';
+            if (dest.characteristics && Object.keys(dest.characteristics).length > 0) {
+                charHTML = '<div style="margin-bottom: 20px;"><h3 style="margin-bottom: 15px;">✨ Characteristics</h3>';
+                
+                for (const [category, prompts] of Object.entries(dest.characteristics)) {
+                    if (prompts && prompts.length > 0) {
+                        charHTML += '<div style="margin-bottom: 10px;"><strong>' + category + ':</strong><br>';
+                        charHTML += '<div style="display: flex; flex-wrap: wrap; gap: 8px; margin-top: 5px;">';
+                        prompts.forEach(p => {
+                            charHTML += '<span style="background: #f0f4ff; color: #667eea; padding: 5px 12px; border-radius: 15px; font-size: 12px;">' + p.split(',')[0] + '</span>';
+                        });
+                        charHTML += '</div></div>';
+                    }
+                }
+                
+                charHTML += '</div>';
+            }
+            
+            let offersHTML = '';
+            if (dest.offers && (dest.offers.hotels || dest.offers.activities)) {
+                offersHTML = '<div style="margin-bottom: 20px;"><h3 style="margin-bottom: 15px;">💼 Available Offers</h3>';
+                
+                if (dest.offers.hotels && dest.offers.hotels.length > 0) {
+                    offersHTML += '<h4 style="margin-bottom: 10px; color: #666;">🏨 Hotels</h4>';
+                    dest.offers.hotels.forEach(hotel => {
+                        offersHTML += '<div style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 10px;">';
+                        offersHTML += '<div style="font-weight: 600; margin-bottom: 5px;">' + hotel.name + '</div>';
+                        offersHTML += '<div style="font-size: 14px; color: #666;">';
+                        if (hotel.price_per_night) offersHTML += '<span style="color: #667eea; font-weight: bold;">₹' + hotel.price_per_night + '/night</span> ';
+                        if (hotel.rating) offersHTML += '<span style="color: #ffa500;">⭐ ' + hotel.rating + '</span>';
+                        if (hotel.amenities) offersHTML += '<br><span style="font-size: 12px;">' + hotel.amenities.join(', ') + '</span>';
+                        offersHTML += '</div></div>';
+                    });
+                }
+                
+                if (dest.offers.activities && dest.offers.activities.length > 0) {
+                    offersHTML += '<h4 style="margin-bottom: 10px; color: #666; margin-top: 15px;">🎯 Activities</h4>';
+                    dest.offers.activities.forEach(activity => {
+                        offersHTML += '<div style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 10px;">';
+                        offersHTML += '<div style="font-weight: 600; margin-bottom: 5px;">' + activity.name + '</div>';
+                        offersHTML += '<div style="font-size: 14px; color: #666;">';
+                        if (activity.price) offersHTML += '<span style="color: #667eea; font-weight: bold;">₹' + activity.price + '</span> ';
+                        if (activity.duration_hours) offersHTML += '<span>' + activity.duration_hours + ' hours</span>';
+                        offersHTML += '</div></div>';
+                    });
+                }
+                
+                offersHTML += '</div>';
+            }
+            
+            let geoHTML = '';
+            if (dest.geo_location && (dest.geo_location.latitude || dest.geo_location.city)) {
+                geoHTML = '<div style="margin-bottom: 20px; background: #f0f8ff; padding: 15px; border-radius: 8px;"><h3 style="margin-bottom: 10px;">📍 Location</h3>';
+                
+                if (dest.geo_location.city) {
+                    geoHTML += '<div style="margin-bottom: 5px;"><strong>City:</strong> ' + dest.geo_location.city;
+                    if (dest.geo_location.region) geoHTML += ', ' + dest.geo_location.region;
+                    geoHTML += '</div>';
+                }
+                
+                if (dest.geo_location.latitude && dest.geo_location.longitude) {
+                    geoHTML += '<div><strong>Coordinates:</strong> ' + dest.geo_location.latitude.toFixed(4) + ', ' + dest.geo_location.longitude.toFixed(4) + '</div>';
+                    geoHTML += '<div style="margin-top: 10px;"><a href="https://www.google.com/maps?q=' + dest.geo_location.latitude + ',' + dest.geo_location.longitude + '" target="_blank" style="color: #667eea; text-decoration: none; font-weight: 500;">🗺️ View on Google Maps</a></div>';
+                }
+                
+                geoHTML += '</div>';
+            }
+            
+            modal.innerHTML = '<div style="max-width: 900px; margin: 40px auto; background: white; border-radius: 15px; padding: 30px; position: relative;"><button onclick="closeModal()" style="position: absolute; top: 15px; right: 15px; background: #667eea; color: white; border: none; width: 40px; height: 40px; border-radius: 50%; font-size: 24px; cursor: pointer;">×</button><h1 style="margin-bottom: 10px;">' + dest.destination_name + '</h1><p style="color: #999; margin-bottom: 20px;">📍 ' + dest.state + ', India</p><div style="display: flex; gap: 15px; margin-bottom: 30px;"><div style="flex: 1; background: #f8f9fa; padding: 15px; border-radius: 8px; text-align: center;"><div style="font-size: 12px; color: #999;">Match Score</div><div style="font-size: 28px; font-weight: bold; color: #667eea;">' + Math.round(dest.similarity_score) + '%</div></div><div style="flex: 1; background: #f8f9fa; padding: 15px; border-radius: 8px; text-align: center;"><div style="font-size: 12px; color: #999;">Appearances</div><div style="font-size: 28px; font-weight: bold; color: #667eea;">' + dest.appearances + 'x</div></div><div style="flex: 1; background: #f8f9fa; padding: 15px; border-radius: 8px; text-align: center;"><div style="font-size: 12px; color: #999;">Final Score</div><div style="font-size: 28px; font-weight: bold; color: #667eea;">' + dest.final_score.toFixed(1) + '</div></div></div>' + imagesHTML + geoHTML + charHTML + offersHTML + '<button onclick="closeModal()" style="width: 100%; background: #667eea; color: white; border: none; padding: 15px; border-radius: 8px; font-size: 16px; font-weight: 500; cursor: pointer; margin-top: 20px;">Close</button></div>';
+            
+            document.body.appendChild(modal);
+            document.body.style.overflow = 'hidden';
+        }
+        
+        function closeModal() {
+            const modal = document.getElementById('details-modal');
+            if (modal) {
+                modal.remove();
+                document.body.style.overflow = 'auto';
+            }
+        }
+        
+        function openImageFullscreen(src) {
+            const fullscreen = document.createElement('div');
+            fullscreen.style.cssText = 'position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 2000; display: flex; align-items: center; justify-content: center; cursor: pointer;';
+            fullscreen.onclick = () => fullscreen.remove();
+            fullscreen.innerHTML = '<img src="' + src + '" style="max-width: 90%; max-height: 90%; object-fit: contain;">';
+            document.body.appendChild(fullscreen);
+        }
+        
+        function resetSearch() {
+            selectedFiles = [];
+            previewContainer.innerHTML = '';
+            resultsSection.style.display = 'none';
+            uploadSection.style.display = 'block';
+            updateUI();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+        
+        function showError(message) {
+            const errorDiv = document.createElement('div');
+            errorDiv.className = 'error-box';
+            errorDiv.textContent = message;
+            errorContainer.appendChild(errorDiv);
+            setTimeout(() => errorDiv.remove(), 5000);
+        }
+    </script>
+</body>
+</html>
